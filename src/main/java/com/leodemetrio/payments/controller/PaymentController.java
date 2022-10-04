@@ -2,6 +2,7 @@ package com.leodemetrio.payments.controller;
 
 import com.leodemetrio.payments.dto.PaymentDto;
 import com.leodemetrio.payments.service.PaymentService;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.web.PageableDefault;
@@ -56,9 +57,13 @@ public class PaymentController {
         return ResponseEntity.noContent().build();
     }
 
-    @PatchMapping("/{id}/confirmar")
+    @PatchMapping("/{id}/confirm")
+    @CircuitBreaker(name = "updateOrder", fallbackMethod = "paymentConfirmedWithIntegrationPendent")
     public void confirmPayment(@PathVariable @NotNull Long id){
         paymentService.confirmPayment(id);
     }
 
+    public void paymentConfirmedWithIntegrationPendent(Long id, Exception e){
+        paymentService.updateStatus(id);
+    }
 }

@@ -69,4 +69,14 @@ public class PaymentService {
         iOrderClient.updatePayment(payment.get().getOrderId());
     }
 
+    public void updateStatus(Long id) {
+        Optional<Payment> payment = paymentRepository.findById(id);
+
+        if (!payment.isPresent()) {
+            throw new EntityNotFoundException();
+        }
+
+        payment.get().setStatus(Status.CONFIRMED_LESS_INTEGRATION);
+        paymentRepository.save(payment.get());
+    }
 }
